@@ -15,6 +15,7 @@ public class ExponentialBackoff {
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(timeoutSeconds))
                 .build();
+        long baseDelay = 1000;
 
         for (int i = 1; i <= maxSteps; i++){
             long startTime = System.currentTimeMillis();
@@ -41,8 +42,10 @@ public class ExponentialBackoff {
                 break;
             }
 
-            long jitterSleep = ThreadLocalRandom.current().nextLong(1000, 3000);
-            System.out.println("Waiting "+ jitterSleep + "ms before next retry");
+            long maxWaitTime = baseDelay * (1L << (i - 1));
+            long jitterSleep = ThreadLocalRandom.current().nextLong(0, maxWaitTime);
+            long totalWait = maxWaitTime + jitterSleep;
+            System.out.println("Waiting "+ totalWait + "ms before next retry");
 
             try {
                 Thread.sleep(jitterSleep);
