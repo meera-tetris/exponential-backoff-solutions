@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 
+
 public class ExponentialBackoff {
 
     public static void hittingUrlWithJitter (String url, int maxSteps, long timeoutSeconds) {
@@ -14,6 +15,7 @@ public class ExponentialBackoff {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(timeoutSeconds))
+                .method("HEAD", HttpRequest.BodyPublishers.noBody())
                 .build();
         long baseDelay = 1000;
 
@@ -25,12 +27,14 @@ public class ExponentialBackoff {
 
                 HttpResponse<Void> response = httpClient.send(httpRequest,HttpResponse.BodyHandlers.discarding());
 
-                if (response.statusCode() == 200){
+                int status = response.statusCode();
+
+                if (status >= 200 && status < 300){
                     long timeTaken = System.currentTimeMillis() - startTime;
-                    System.out.println("SUCCESS! "+ timeTaken + " ms taken");
+                    System.out.println("SUCCESS (" + status + ") in " + timeTaken + " ms taken");
                     return;
                 } else {
-                    System.out.println("Failed :" + response.statusCode());
+                    System.out.println("Failed with status : " + status);
                 }
 
             }catch (Exception e){
@@ -44,8 +48,8 @@ public class ExponentialBackoff {
 
             long maxWaitTime = baseDelay * (1L << (i - 1));
             long jitterSleep = ThreadLocalRandom.current().nextLong(0, maxWaitTime);
-            long totalWait = maxWaitTime + jitterSleep;
-            System.out.println("Waiting "+ totalWait + "ms before next retry");
+
+            System.out.println("Waiting "+ jitterSleep  + "ms before next retry");
 
             try {
                 Thread.sleep(jitterSleep);
@@ -54,8 +58,4 @@ public class ExponentialBackoff {
         }
     }
 
-    public static void main(String[] args){
-//        hittingUrlWithJitter("https://www.google.com",5);
-        hittingUrlWithJitter("https://www.raman.com",3,3);
-    }
 }
