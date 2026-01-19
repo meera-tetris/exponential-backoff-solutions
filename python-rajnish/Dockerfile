@@ -15,5 +15,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backoff.py .
 
 # Run the application when container starts
-CMD ["python", "backoff.py"]
+CMD ["python","-u", "backoff.py"]
 

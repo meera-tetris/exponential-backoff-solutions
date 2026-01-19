@@ -41,7 +41,7 @@ def backoff(
             # Raise an exception for HTTP error status codes (4xx, 5xx)
             response.raise_for_status()
 
-            print(f"Response status: {response.status_code}")
+            print(f"Response status: {response.status_code}", flush=True)
             return response.status_code
 
         except requests.RequestException as err:
@@ -56,16 +56,18 @@ def backoff(
             if retry_count == max_retries - 1:
                 print(
                     f"Error connecting ({err})... retry limit reached after "
-                    f"{max_retries} attempts"
+                    f"{max_retries} attempts",
+                    flush=True,
                 )
             else:
                 print(
                     f"Error connecting ({err})... retrying in {wait_time:.2f} seconds "
-                    f"(attempt {retry_count + 1}/{max_retries})"
+                    f"(attempt {retry_count + 1}/{max_retries})",
+                    flush=True,
                 )
                 time.sleep(wait_time)
 
-    print("All retry attempts exhausted. Request failed.")
+    print("All retry attempts exhausted. Request failed.", flush=True)
     return None
 
 
@@ -74,19 +76,19 @@ def main() -> None:
     Main entry point for the exponential backoff demonstration.
 
     """
-    print("Exponential backoff with jitter")
+    print("Exponential backoff with jitter", flush=True)
 
     result = backoff(
-        url="https://googl.com",
+        url="https://mock.httpstatus.io/404",
         base_delay=1.0,  
         max_retries=4,   
         jitter=0.25,     
     )
 
     if result is None:
-        print("\nFailed to connect after all retry attempts.")
+        print("\nFailed to connect after all retry attempts.", flush=True)
     else:
-        print(f"\nSuccessfully connected with status code: {result}")
+        print(f"\nSuccessfully connected with status code: {result}", flush=True)
 
 
 if __name__ == "__main__":
