@@ -10,5 +10,5 @@ COPY . .
 # 4. Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Run the program
-CMD ["python", "main.py"]
+# 5. Run the program (with unbuffered output for real-time logging)
+CMD ["python", "-u", "main.py"]
